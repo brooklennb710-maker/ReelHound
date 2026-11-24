@@ -1,0 +1,13 @@
+{
+  "port": 8876,
+  "my_accounts": {
+    "instagram": [
+      "YOUR_INSTAGRAM_HANDLE"
+    ],
+    "facebook": [],
+    "tiktok": [],
+    "youtube": []
+  },
+  "cookies_from_browser": "",
+  "short_clip_max_seconds": 90
+}

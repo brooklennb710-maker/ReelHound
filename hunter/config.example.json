@@ -1,0 +1,88 @@
+{
+  "youtube_api_key": "PASTE_YOUR_FREE_YOUTUBE_API_KEY_HERE",
+  "keywords": [
+    "game clips",
+    "funny gaming moments",
+    "tips and tricks",
+    "hidden details",
+    "insane plays"
+  ],
+  "keywords_per_run": 2,
+  "lookback_hours": 12,
+  "subreddits": [
+    "gaming",
+    "videos"
+  ],
+  "reddit": {
+    "client_id": "PASTE_YOUR_REDDIT_APP_ID",
+    "client_secret": "PASTE_YOUR_REDDIT_APP_SECRET"
+  },
+  "min_score": 40,
+  "max_downloads_per_run": 5,
+  "max_video_minutes": 30,
+  "every_minutes": 45,
+  "instagram": {
+    "ig_user_id": "",
+    "access_token": "PASTE_YOUR_LONG_LIVED_ACCESS_TOKEN",
+    "graph_version": "v23.0",
+    "hashtags": [
+      "gaming",
+      "gamingclips",
+      "funnyclips"
+    ]
+  },
+  "auto_clip": true,
+  "clips_per_video": 3,
+  "clip_seconds": 40,
+  "clip_preset": "viral",
+  "sources": {
+    "youtube": true,
+    "reddit": true,
+    "instagram": true
+  },
+  "youtube_channel_id": "",
+  "captions": true,
+  "whisper_model": "small",
+  "caption_size": null,
+  "credit_text": "",
+  "credit_position": "bottom-center",
+  "cookies_file": "youtube_cookies.txt",
+  "cookies_from_browser": "",
+  "page_port": 8765,
+  "hook_model": "qwen3.5:9b",
+  "review_model": "gemma4:12b",
+  "must_include": [],
+  "priority_words": [],
+  "block_words": [
+    "leak",
+    "leaked",
+    "datamine",
+    "free download",
+    "crack",
+    "pirat",
+    "mod menu",
+    "giveaway link"
+  ],
+  "score_words": {
+    "secret": 7,
+    "hidden": 7,
+    "trick": 7,
+    "tips": 7,
+    "how to": 7,
+    "guide": 6,
+    "tutorial": 6,
+    "best": 5,
+    "insane": 5,
+    "crazy": 5,
+    "unbelievable": 6,
+    "funny": 8,
+    "fail": 6,
+    "reaction": 4,
+    "revealed": 5,
+    "explained": 5,
+    "before": 4,
+    "after": 4,
+    "viral": 5,
+    "moment": 4
+  }
+}

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="__APP__ Inbox">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="/manifest.json">
+<title>__APP__ Inbox</title>
+<style>
+  :root { color-scheme: dark; --bg:#111; --card:#1c1c1e; --line:#2c2c2e; --text:#f2f2f2; --dim:#9a9aa0; --accent:#ff2d87; --ok:#34c759; --warn:#ffcc00; --bad:#ff453a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:17px/1.4 -apple-system, system-ui, sans-serif; padding:calc(env(safe-area-inset-top) + 14px) 14px 40px; }
+  h1 { font-size:22px; margin:0 0 12px; } h1 span { color:var(--accent); }
+  .card { background:var(--card); border-radius:16px; padding:14px; margin-bottom:14px; }
+  textarea { width:100%; min-height:74px; background:#000; color:var(--text); border:1px solid var(--line); border-radius:12px; padding:12px; font:inherit; resize:vertical; }
+  input[type=text] { width:100%; background:#000; color:var(--text); border:1px solid var(--line); border-radius:12px; padding:12px; font:inherit; }
+  .row { display:flex; gap:10px; margin-top:10px; }
+  button, .btn { flex:1; border:0; border-radius:12px; padding:14px 10px; font:600 16px -apple-system, system-ui, sans-serif; background:#2c2c2e; color:var(--text); text-align:center; text-decoration:none; }
+  button.pick { outline:2px solid transparent; }
+  button.pick.on { background:var(--accent); color:#fff; }
+  button.go { background:var(--accent); color:#fff; font-size:18px; }
+  button:disabled { opacity:.5; }
+  label.check { display:flex; align-items:center; gap:10px; margin-top:12px; color:var(--dim); }
+  label.check input { width:22px; height:22px; accent-color:var(--accent); }
+  .msg { margin-top:10px; min-height:1.4em; color:var(--dim); }
+  .msg.ok { color:var(--ok); } .msg.bad { color:var(--bad); }
+  .file { display:block; margin-top:10px; padding:14px; border:1px dashed #48484a; border-radius:12px; text-align:center; color:var(--dim); }
+  .file input { display:none; }
+  progress { width:100%; margin-top:8px; accent-color:var(--accent); display:none; }
+  .item { border-top:1px solid var(--line); padding:12px 0; } .item:first-child { border-top:0; padding-top:0; }
+  .t { font-weight:600; word-break:break-word; } .s { font-size:14px; color:var(--dim); word-break:break-word; }
+  .tag { display:inline-block; font-size:13px; font-weight:600; padding:2px 8px; border-radius:8px; margin:4px 0; background:#2c2c2e; }
+  .tag.done { color:var(--ok); } .tag.wait { color:var(--warn); } .tag.fail { color:var(--bad); } .tag.busy { color:#64d2ff; }
+  .draft { margin-top:8px; background:#000; border-radius:10px; padding:10px; font-size:14px; color:#d1d1d6; white-space:pre-wrap; }
+  .small { font-size:13px; color:var(--dim); }
+  .hide { display:none; }
+  .reel { margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+  video { width:100%; max-height:70vh; border-radius:12px; background:#000; margin-top:8px; }
+  button.ok { background:var(--ok); color:#000; }
+  .redo { margin-top:10px; } .redo .small { margin-bottom:6px; }
+  .redo select { background:#2c2c2e; color:var(--text); border:0; border-radius:12px; padding:0 10px; font:600 16px -apple-system, system-ui, sans-serif; flex:0 0 76px; }
+</style>
+</head>
+<body>
+<h1>__APP__ <span>Inbox</span></h1>
+<div id="conn" class="small" style="margin:-6px 0 10px">Connecting to your PC...</div>
+<div id="banner" class="card hide" style="border:2px solid var(--ok)"></div>
+
+<div class="card">
+  <textarea id="link" placeholder="Paste a Reel, TikTok, YouTube or X link (or several)"></textarea>
+  <div class="row"><button id="paste">Paste link</button></div>
+  <div class="row">
+    <button class="pick on" data-whose="mine">My clip</button>
+    <button class="pick" data-whose="other">Someone else's</button>
+  </div>
+  <label class="check"><input type="checkbox" id="whole"> Whole video (keep all of it, don't pick a moment)</label>
+  <div id="wholeHint" class="small hide" style="margin-top:6px">One Reel from start to finish. If it's over 90 seconds, this page asks whether to split it into parts or keep the first 90 s.</div>
+  <label class="check"><input type="checkbox" id="guide"> It's a how-to / guide (cut it to the main steps)</label>
+  <div id="otherHint" class="small hide" style="margin-top:8px">Someone else's clip gets checked against your creator list. If they haven't said yes, it waits here with a message ready to send them.</div>
+  <div class="row"><button class="go" id="send">Send to pipeline</button></div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<div class="card">
+  <div class="t">Or send the video file</div>
+  <div class="small">For clips saved in your camera roll. Uses the same My clip / Someone else's choice above.</div>
+  <input type="text" id="creator" class="hide" placeholder="Their @handle (needed for someone else's clip)" style="margin-top:10px">
+  <label class="file">Choose video<input type="file" id="file" accept="video/*"></label>
+  <progress id="prog" max="100" value="0"></progress>
+  <div class="msg" id="fmsg"></div>
+</div>
+
+<div class="card">
+  <div class="t" style="margin-bottom:8px">Recent</div>
+  <div id="list" class="s">Loading...</div>
+</div>
+<div class="small">Nothing here posts or schedules. Finished Reels land in media\edits on the PC for review.</div>
+
+<script>
+let whose = "mine";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+document.querySelectorAll(".pick").forEach(b => b.onclick = () => {
+  whose = b.dataset.whose;
+  document.querySelectorAll(".pick").forEach(x => x.classList.toggle("on", x === b));
+  $("otherHint").classList.toggle("hide", whose !== "other");
+  $("creator").classList.toggle("hide", whose !== "other");
+});
+
+$("whole").onchange = () => $("wholeHint").classList.toggle("hide", !$("whole").checked);
+
+$("paste").onclick = async () => {
+  try { const t = await navigator.clipboard.readText(); if (t) $("link").value = t; }
+  catch { $("link").focus(); say("msg", "Tap the box and choose Paste.", ""); }
+};
+
+function say(id, text, kind) { const m = $(id); m.textContent = text; m.className = "msg " + (kind || ""); }
+
+async function post(path, body) {
+  let r;
+  try { r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+  catch { throw new Error("Couldn't reach your PC, so nothing was sent. Turn on Tailscale on this phone and try again."); }
+  const d = await r.json().catch(() => ({ ok: false, error: "No answer from the PC. Is Tailscale on?" }));
+  if (!r.ok || !d.ok) throw new Error(d.error || "Something went wrong.");
+  return d;
+}
+
+$("send").onclick = async () => {
+  const text = $("link").value.trim();
+  if (!text) return say("msg", "Paste a link first.", "bad");
+  $("send").disabled = true;
+  try {
+    const d = await post("/api/add", { text, whose, guide: $("guide").checked, whole: $("whole").checked });
+    d.added.forEach(id => seen[id] = "queued");
+    say("msg", d.message + " Watch Recent below. This page tells you when it's ready." + (d.errors.length ? " (" + d.errors.join("; ") + ")" : ""), "ok");
+    $("link").value = ""; $("guide").checked = false; $("whole").checked = false; $("wholeHint").classList.add("hide"); load();
+  } catch (e) { say("msg", e.message, "bad"); }
+  $("send").disabled = false;
+};
+
+$("file").onchange = () => {
+  const f = $("file").files[0]; if (!f) return;
+  const creator = $("creator").value.trim();
+  if (whose === "other" && !creator) { $("file").value = ""; return say("fmsg", "Add their @handle first.", "bad"); }
+  const q = new URLSearchParams({ whose, name: f.name, guide: $("guide").checked ? "1" : "", whole: $("whole").checked ? "1" : "", creator });
+  const x = new XMLHttpRequest();
+  x.open("POST", "/api/upload?" + q);
+  $("prog").style.display = "block"; say("fmsg", "Uploading...", "");
+  x.upload.onprogress = e => { if (e.lengthComputable) $("prog").value = 100 * e.loaded / e.total; };
+  x.onload = () => {
+    $("prog").style.display = "none"; $("file").value = "";
+    let d = {}; try { d = JSON.parse(x.responseText); } catch {}
+    if (d.ok) d.added.forEach(id => seen[id] = "queued");
+    d.ok ? say("fmsg", d.message + " Watch Recent below.", "ok") : say("fmsg", d.error || "Upload failed.", "bad"); load();
+  };
+  x.onerror = () => { $("prog").style.display = "none"; say("fmsg", "Upload failed. Is the PC on?", "bad"); };
+  x.send(f);
+};
+
+function label(s) {
+  if (s === "queued") return ["busy", "1/3 Received, waiting its turn"];
+  if (s === "downloading") return ["busy", "2/3 Downloading..."];
+  if (s === "clipping") return ["busy", "3/3 Making the Reel (takes 1-3 min)..."];
+  if (s.startsWith("done: no")) return ["fail", "Finished, but no moment was strong enough to clip"];
+  if (s.startsWith("done")) return ["done", "Reel made"];
+  if (s.startsWith("waiting")) return ["wait", "Held: waiting on the creator's permission"];
+  if (s === "needs choice") return ["wait", "Too long for one Reel: pick how to clip it"];
+  if (s.startsWith("skipped")) return ["fail", s.replace(/^skipped: /, "Skipped: ")];
+  if (s.startsWith("failed")) return ["fail", "Failed: " + s.replace(/^failed: /, "")];
+  return ["busy", s];
+}
+function tag(s) { const [k, t] = label(s); return `<span class="tag ${k}">${esc(t)}</span>`; }
+function final(s) { return /^(done|waiting|skipped|failed|needs choice)/.test(s); }
+let seen = JSON.parse(localStorage.getItem("vvpSeen") || "{}");
+function announce(rows) {
+  const news = rows.filter(r => final(r.status) && seen[r.id] && !final(seen[r.id]));
+  rows.forEach(r => seen[r.id] = r.status);
+  localStorage.setItem("vvpSeen", JSON.stringify(seen));
+  if (!news.length) return;
+  const b = $("banner");
+  b.innerHTML = news.map(r => `<div class="t">${esc((r.title || r.url || r.note || "Your clip").slice(0, 80))}</div>${tag(r.status)}`).join("") +
+    `<div class="row"><button onclick="$('banner').classList.add('hide')">OK</button></div>`;
+  b.classList.remove("hide");
+  if (navigator.vibrate) navigator.vibrate(200);
+}
+
+async function load() {
+  try {
+    const d = await (await fetch("/api/items")).json();
+    $("conn").innerHTML = `<span style="color:var(--ok)">● Connected to your PC</span> · updated ${new Date().toLocaleTimeString([], {hour: "numeric", minute: "2-digit"})}`;
+    announce(d.items);
+    const snap = JSON.stringify(d.items);
+    if (snap === lastSnap || document.querySelector("#list video")) return;  // don't interrupt a clip you're watching
+    lastSnap = snap;
+    if (!d.items.length) { $("list").textContent = "Nothing yet. Send your first clip above."; return; }
+    $("list").innerHTML = d.items.map(r => {
+      const name = r.title || r.url || r.note || "uploaded video";
+      const mode = r.whole ? ` · whole video${r.whole_mode === "parts" ? " in parts" : r.whole_mode === "cap" ? ", first 90 s" : ""}` : "";
+      const who = (r.creator ? `${r.whose === "mine" ? "yours" : "by"} @${esc(r.creator)} · ${esc(r.platform)}` : (r.whose === "mine" ? "yours" : "someone else's")) + mode;
+      let extra = "";
+      if (r.status === "waiting permission") {
+        extra = `<div class="draft" id="d${r.id}">${esc(r.message)}</div>
+          <div class="row"><button class="go" onclick="yes('${r.id}')">Approved, make it</button></div>
+          <div class="row"><button onclick="copyDraft('${r.id}')">Copy message</button>${r.url ? `<a class="btn" href="${esc(r.url)}">Open post</a>` : ""}</div>`;
+      } else if (r.status === "needs choice") {
+        extra = `<div class="draft">${esc(r.message)}</div>
+          <div class="row"><button class="go" onclick="whole('parts','${r.id}')">Split into ${esc(r.parts)} parts (~${esc(r.part_len)} each)</button></div>
+          <div class="row"><button onclick="whole('cap','${r.id}')">First 90 s only</button><button onclick="whole('moments','${r.id}')">Best moments instead</button></div>`;
+      } else if (r.status.startsWith("failed")) {
+        extra = `<div class="row"><button onclick="act('retry','${r.id}')">Try again</button><button onclick="act('remove','${r.id}')">Remove</button></div>`;
+      } else if (r.reels && r.reels.length) {
+        extra = r.reels.map(c => reel(c)).join("");
+      }
+      return `<div class="item"><div class="t">${esc(name.slice(0, 120))}</div><div class="s">${who}</div>${tag(r.status)}${r.note && r.whose === "other" && r.note.startsWith("sent as yours") ? `<div class="small">${esc(r.note)}</div>` : ""}${extra}</div>`;
+    }).join("");
+  } catch {
+    $("conn").innerHTML = `<span style="color:var(--bad)">● Can't reach your PC.</span> Turn on Tailscale on this phone, and check the PC is on with the pipeline open.`;
+  }
+}
+
+let lastSnap = "";
+function reel(c) {
+  const n = esc(c.name), a = esc(c.area), key = n.replace(/[^A-Za-z0-9]/g, "");
+  if (c.state === "gone") return `<div class="reel"><div class="small">${n}</div><span class="tag">Skipped or moved</span></div>`;
+  const cap = c.caption ? `<div class="draft">${esc(c.caption)}</div>` : "";
+  const watch = `<div id="v${key}"></div><div class="row"><button onclick="watch('${key}','${n}','${a}')">▶ Watch</button></div>`;
+  const from = c.redo_from ? `<span class="tag done">Re-cut: ${esc(c.redo_from)}</span>` : "";
+  if (c.state === "approved")
+    return `<div class="reel"><span class="tag done">✓ Approved: in media\\ready (not posted)</span>${from}${watch}${cap}</div>`;
+  if (c.redo === "working")
+    return `<div class="reel">${from}<span class="tag busy">Re-cutting so it ${esc(c.redo_text)} (1-3 min)...</span>${watch}${cap}</div>`;
+  const failed = c.redo === "failed" ? `<div class="small" style="color:var(--bad)">Last re-cut failed: ${esc(c.redo_text)}</div>` : "";
+  return `<div class="reel">${from}${watch}${cap}
+    <div class="row"><button class="ok" onclick="review('approve','${n}')">Approve</button><button onclick="review('skip','${n}')">Skip</button></div>
+    <div class="redo"><div class="small">Cut off or starts too late? Re-cut it from the original video. The AI redoes the captions and hook.</div>${failed}
+      <div class="row"><button onclick="redo('${n}','earlier','${key}')">⏪ Start earlier</button>
+        <select id="s${key}" aria-label="How many seconds"><option value="3">3 s</option><option value="5" selected>5 s</option><option value="10">10 s</option><option value="15">15 s</option></select>
+        <button onclick="redo('${n}','later','${key}')">Extend end ⏩</button></div></div></div>`;
+}
+async function redo(name, which, key) {
+  const secs = Number($("s" + key).value);
+  try {
+    const d = await post("/api/reclip", { name, [which]: secs });
+    say("msg", d.message + " Nothing was posted.", "ok");
+  } catch (e) { say("msg", e.message, "bad"); }
+  document.querySelectorAll("#list video").forEach(v => v.remove());
+  lastSnap = ""; load();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function watch(key, name, area) {
+  const box = $("v" + key);
+  if (box.innerHTML) { box.innerHTML = ""; lastSnap = ""; load(); return; }
+  box.innerHTML = `<video controls playsinline preload="metadata" src="/video?area=${area}&name=${encodeURIComponent(name)}"></video>`;
+  box.querySelector("video").play().catch(() => {});
+}
+async function review(what, name) {
+  try {
+    await post("/api/" + what, { name });
+    say("msg", what === "approve" ? "Approved. It's in media\\ready. Nothing was posted." : "Skipped. It's in the panel's deleted folder if you change your mind.", "ok");
+  } catch (e) { say("msg", e.message, "bad"); }
+  document.querySelectorAll("#list video").forEach(v => v.remove());
+  lastSnap = ""; load();
+}
+async function act(what, id) { try { await post("/api/" + what, { id }); } catch (e) { alert(e.message); } lastSnap = ""; load(); }
+async function whole(mode, id) {
+  try { await post("/api/whole", { id, mode }); say("msg", mode === "moments" ? "OK, finding the best moments instead (1-3 min)." : "OK, making it now. Recent shows when it's ready.", "ok"); }
+  catch (e) { say("msg", e.message, "bad"); }
+  lastSnap = ""; load();
+}
+async function yes(id) {
+  try { await post("/api/yes", { id }); say("msg", "Approved. Making the Reel now (1-3 min). Recent shows when it's ready.", "ok"); }
+  catch (e) { say("msg", e.message, "bad"); }
+  lastSnap = ""; load();
+}
+async function copyDraft(id) {
+  try { await navigator.clipboard.writeText($("d" + id).textContent); say("msg", "Message copied. Paste it in their DMs.", "ok"); }
+  catch { say("msg", "Press and hold the message to copy it.", ""); }
+}
+
+// A share-sheet Shortcut can open this page as /?url=<link>; the link is filled in and ready to send.
+const pre = new URLSearchParams(location.search);
+if (pre.get("url") || pre.get("text")) { $("link").value = pre.get("url") || pre.get("text"); history.replaceState(null, "", "/"); }
+load(); setInterval(load, 6000);
+</script>
+</body>
+</html>

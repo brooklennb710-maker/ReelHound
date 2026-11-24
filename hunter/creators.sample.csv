@@ -1,0 +1,6 @@
+platform,handle,channel_id,permission,contact,notes
+youtube,yourchannel,PASTE_YOUR_YOUTUBE_CHANNEL_ID,own,,your own channel
+youtube,Some Creator,UCxxxxxxxxxxxxxxxxxxxxxx,yes,creator@example.com,said yes in a DM on 2026-01-01
+youtube,An Official Brand,UCyyyyyyyyyyyyyyyyyyyyyy,official,,only their own uploads; credit on screen
+instagram,somecreator,,asked,,message sent and waiting for a reply
+tiktok,anothercreator,,no,,asked on 2026-01-02 and they declined

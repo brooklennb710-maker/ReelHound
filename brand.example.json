@@ -1,0 +1,13 @@
+{
+  "app": "ReelHound",
+  "company": "BridgesTech",
+  "tagline": "Find it. Clip it. Post it.",
+  "handle": "@yourhandle",
+  "channel": "Your page name",
+  "niche": "gaming clips",
+  "watermark": "@yourhandle",
+  "accent": "#f0b429",
+  "timezone": "",
+  "destinations": ["Instagram Reels", "Facebook Reels", "TikTok", "YouTube Shorts"],
+  "caption_hashtags": "#reels #shorts #clips"
+}

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="panel-token" content="__PANEL_TOKEN__">
+<title>__APP__ | __COMPANY__</title>
+<link rel="stylesheet" href="/app.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<aside class="sidebar">
+  <a class="brand" href="#overview"><span class="mark" aria-hidden="true">__MARK__</span><span>__APP__<small>BY __COMPANY__</small></span></a>
+  <nav aria-label="Workspace">
+    <a href="#overview"><span aria-hidden="true">▦</span>Overview</a>
+    <a href="#hunter"><span aria-hidden="true">◎</span>Hunter</a>
+    <a href="#creators"><span aria-hidden="true">◉</span>Creators</a>
+    <a href="#editing"><span aria-hidden="true">◫</span>Editing</a>
+    <a href="#review"><span aria-hidden="true">▷</span>Clip review <b id="review-count"></b></a>
+    <a href="#schedule"><span aria-hidden="true">▤</span>Schedule</a>
+    <a href="#scoreboard"><span aria-hidden="true">▥</span>Scoreboard</a>
+  </nav>
+  <footer><span class="dot" id="connection-dot"></span><span id="connection">Connecting</span></footer>
+</aside>
+<main id="main">
+  <header class="topbar"><span>__APP__ WORKSPACE</span><span id="date"></span></header>
+  <div class="content">
+    <section id="overview" class="page">
+      <div class="page-title"><div><h1>Pipeline overview</h1><p>Find, cut, and review your next round of Reels.</p></div><a class="button primary" href="#review">Review clips <span aria-hidden="true">↗</span></a></div>
+      <div class="metrics" aria-label="Today's activity">
+        <article><span>Videos found today</span><strong id="found">—</strong></article>
+        <article><span>Downloaded today</span><strong id="downloaded">—</strong></article>
+        <article><span>Videos clipped today</span><strong id="videos_clipped">—</strong><small id="clips_created"></small></article>
+        <article><span>Ready clips</span><strong id="ready">—</strong><small id="queued"></small></article>
+      </div>
+      <div class="overview-grid">
+        <section class="surface activity">
+          <div class="surface-head"><h2>Workers</h2><span class="hint">Live status</span></div>
+          <div id="workers"></div>
+          <p class="hint">Switch off to finish the current work and pause. Workers start off when the panel opens.</p>
+        </section>
+        <section class="surface latest">
+          <div class="surface-head"><h2>Latest clip</h2><a class="text-link" href="#editing">Editing settings</a></div>
+          <div id="latest-overview" class="latest-player"></div>
+        </section>
+      </div>
+      <section class="surface ai-picks">
+        <div class="surface-head"><h2>AI picks</h2><span class="ai-status hint" data-ai-status></span><button class="primary" data-ai-run>Run AI review</button></div>
+        <p class="hint">A free local model on this PC scores every edit from 5 still frames. It can't hear audio, so watch these before you keep them.</p>
+        <div id="ai-top" class="ai-top"></div>
+        <a class="text-link" href="#review">See all clips ranked ↗</a>
+      </section>
+      <section class="surface whole-mini">
+        <div class="surface-head"><h2>Download &amp; repost a full video</h2><a class="text-link" href="#editing">All whole-video reposts ↗</a></div>
+        <p class="hint">Paste a link to download the whole video and turn it into a 9:16 Reel with AI captions and credit. It needs permission in creators.csv; finished Reels go to Clip review and nothing is posted.</p>
+        <form id="whole-link-mini" class="whole-link">
+          <label class="full">Video link<input name="url" type="url" placeholder="https://www.youtube.com/watch?v=...  or an Instagram / TikTok / X link" required></label>
+          <label>Whose video<select name="whose"><option value="other">Someone else's</option><option value="mine">Mine</option></select></label>
+          <button class="primary" type="submit">Download &amp; repost</button>
+        </form>
+        <div id="whole-links-mini" class="whole-list"></div>
+      </section>
+      <section class="surface quick">
+        <div class="surface-head"><h2>Quick links</h2><span class="hint">Open in File Explorer</span></div>
+        <div id="quick-links" class="actions"></div>
+      </section>
+    </section>
+    <section id="hunter" class="page" hidden>
+      <div class="page-title"><div><h1>Hunter settings</h1><p>Choose where the hunter looks and what makes the cut.</p></div><a class="button" href="#overview">Worker controls</a></div>
+      <form id="hunter-form" class="surface form" data-settings="hunter">
+        <div class="form-grid">
+          <label>Scan interval (minutes)<input name="every_minutes" type="number" min="1" max="1440" required></label>
+          <label>Minimum score (0–100)<input name="min_score" type="number" min="0" max="100" required></label>
+          <label>Search terms<textarea name="keywords" rows="6"></textarea><small>One YouTube search term per line.</small></label>
+          <fieldset><legend>Sources</legend>
+            <label class="check"><input type="checkbox" name="youtube"> YouTube</label>
+            <label class="check"><input type="checkbox" name="reddit"> Reddit</label>
+            <label class="check"><input type="checkbox" name="instagram"> Instagram hashtags</label>
+          </fieldset>
+          <label>YouTube API key<input name="youtube_api_key" type="password" autocomplete="new-password"><small id="youtube-key-status"></small></label>
+          <label>Your YouTube channel ID<input name="youtube_channel_id" placeholder="UC…" spellcheck="false"><small>Watch your own channel for new uploads.</small></label>
+          <label class="check full"><input name="clear_youtube_api_key" type="checkbox"> Clear saved YouTube API key</label>
+          <label>Subreddits<textarea name="subreddits" rows="4"></textarea><small>One subreddit per line.</small></label>
+          <label>Instagram hashtags<textarea name="hashtags" rows="4"></textarea><small>One hashtag per line. Instagram finds are saved for manual download.</small></label>
+          <label>Instagram account ID<input name="ig_user_id" spellcheck="false"></label>
+          <label>Instagram access token<input name="access_token" type="password" autocomplete="new-password"><small id="instagram-key-status"></small></label>
+          <label class="check full"><input name="clear_access_token" type="checkbox"> Clear saved Instagram access token</label>
+          <label>Reddit app ID<input name="reddit_client_id" spellcheck="false" autocomplete="off"><small>Reddit blocks scans without a sign-in. Make a free "script" app at reddit.com/prefs/apps and paste its ID (the code under the app name).</small></label>
+          <label>Reddit app secret<input name="reddit_client_secret" type="password" autocomplete="new-password"><small id="reddit-key-status"></small></label>
+          <label class="check full"><input name="clear_reddit_client_secret" type="checkbox"> Clear saved Reddit app secret</label>
+        </div>
+        <button class="primary" type="submit">Save hunter settings</button>
+      </form>
+    </section>
+    <section id="creators" class="page" hidden>
+      <div class="page-title"><div><h1>Creators</h1><p>Manage permissions and follow up on promising finds.</p></div><button id="add-creator" class="primary">Add creator</button></div>
+      <section class="surface">
+        <div class="surface-head"><h2>Creator list</h2><input id="creator-search" type="search" placeholder="Search creators" aria-label="Search creators"></div>
+        <div id="creator-table" class="table-wrap"></div>
+      </section>
+      <section class="surface">
+        <div class="surface-head"><h2>Waiting for permission <span id="waiting-count" class="count"></span></h2><input id="waiting-search" type="search" placeholder="Search finds" aria-label="Search waiting finds"></div>
+        <div id="waiting-list"></div>
+        <div class="actions" id="waiting-pager"></div>
+      </section>
+    </section>
+    <section id="editing" class="page" hidden>
+      <div class="page-title"><div><h1>Editing settings</h1><p>Set the defaults for newly rendered clips.</p></div></div>
+      <div class="overview-grid">
+        <form id="clip-form" class="surface form" data-settings="clip">
+          <div class="form-grid">
+            <label>Clip length (seconds, 15-60 normal, up to 90)<input name="clip_seconds" type="number" min="8" max="90" step="0.1" required></label>
+            <label>Maximum clips per video<input name="clips_per_video" type="number" min="1" max="20" required></label>
+            <label>Caption style<select name="clip_preset"><option value="viral">Viral · highlighted words</option><option value="clean">Clean · plain captions</option><option value="news">News · headline layout</option></select></label>
+            <label>Caption size<input name="caption_size" type="number" min="24" max="160" placeholder="Use style default"></label>
+            <label>Whisper model<select name="whisper_model"><option>tiny</option><option>base</option><option>small</option><option>medium</option><option>large-v3</option></select></label>
+            <label class="check"><input name="captions" type="checkbox"> Burn captions into clips</label>
+            <label>Credit text<input name="credit_text" placeholder="{creator}"><small>Leave blank to use the source credit. Use {creator} to include it in custom text.</small></label>
+            <label>Credit position<select name="credit_position"><option value="bottom-center">Bottom center</option><option value="bottom-left">Bottom left</option><option value="top-left">Top left</option><option value="top-center">Top center</option></select></label>
+          </div>
+          <button type="submit" class="primary">Save editing settings</button>
+        </form>
+        <section class="surface latest"><div class="surface-head"><h2>Latest clip</h2></div><div id="latest-editing" class="latest-player"></div></section>
+      </div>
+      <section class="surface" id="whole-video">
+        <div class="surface-head"><h2>Repost a whole video <span id="whole-count" class="count"></span></h2><input id="whole-search" type="search" placeholder="Search videos or creators" aria-label="Search source videos"></div>
+        <p class="hint">Turns a full downloaded video into a 9:16 Reel instead of picking moments, with the same AI captions, hook and credit. Up to 90 s becomes one Reel; longer videos split into parts of about a minute (up to 8) or keep the first 90 s. Only videos with permission in creators.csv can be used. Reels go to Clip review; nothing is posted.</p>
+        <form id="whole-link-form" class="whole-link">
+          <label class="full">Paste a video link<input name="url" type="url" placeholder="https://www.youtube.com/watch?v=...  or an Instagram / TikTok / X link" required></label>
+          <label>Whose video<select name="whose"><option value="other">Someone else's</option><option value="mine">Mine</option></select></label>
+          <button class="primary" type="submit">Download &amp; repost whole video</button>
+        </form>
+        <div id="whole-links" class="whole-list"></div>
+        <h3 class="whole-sub">Already downloaded</h3>
+        <div id="whole-list" class="whole-list"></div>
+        <div class="actions" id="whole-pager"></div>
+      </section>
+    </section>
+    <section id="review" class="page" hidden>
+      <div class="page-title"><div><h1>Clip review</h1><p>Watch edits, polish captions, and keep your best takes.</p></div><button data-open="edits">Open edits folder</button></div>
+      <div class="actions toolbar"><input id="clip-search" type="search" placeholder="Search name, caption, creator or what happens" aria-label="Search clips"><span id="clip-count" class="hint"></span><label class="check"><input id="ai-only" type="checkbox"> AI picks only (hide skips and duplicates)</label><span class="ai-status hint" data-ai-status></span><button data-ai-run>Run AI review</button></div>
+      <div class="actions toolbar filters" id="clip-filters">
+        <label>Creator<select id="f-creator"><option value="">All creators</option></select></label>
+        <label>Type<select id="f-category"><option value="">All types</option></select></label>
+        <label>AI verdict<select id="f-verdict"><option value="">Any</option><option value="keep">Keep</option><option value="maybe">Maybe</option><option value="skip">Skip</option><option value="none">Not scored</option></select></label>
+        <label>Min AI score<input id="f-score" type="number" min="0" max="100" step="5" placeholder="0"></label>
+        <label>Length<select id="f-length"><option value="">Any length</option><option value="0-15">Under 15 s</option><option value="15-30">15–30 s</option><option value="30-60">30–60 s</option><option value="60-9999">Over 60 s</option></select></label>
+        <label>Style<select id="f-preset"><option value="">Any style</option><option value="viral">Viral</option><option value="clean">Clean</option><option value="news">News</option></select></label>
+        <label>Rendered<select id="f-age"><option value="">Any time</option><option value="1">Last 24 h</option><option value="3">Last 3 days</option><option value="7">Last 7 days</option></select></label>
+        <label>Sort<select id="f-sort"><option value="rank">AI rank</option><option value="score">AI score, high first</option><option value="new">Newest first</option><option value="old">Oldest first</option><option value="short">Shortest first</option><option value="creator">Creator A–Z</option></select></label>
+        <label class="check"><input id="f-issues" type="checkbox"> Hide clips with AI-flagged problems</label>
+        <button type="button" id="f-clear">Clear filters</button>
+      </div>
+      <div id="clip-grid" class="clip-grid"></div>
+      <div class="actions" id="clip-pager"></div>
+    </section>
+    <section id="schedule" class="page" hidden>
+      <div class="page-title"><div><h1>Schedule</h1><p>Plan your posts in your own time zone.</p></div><button data-open="ready">Open ready folder</button></div>
+      <div class="schedule-grid">
+        <form id="schedule-form" class="surface form">
+          <h2>Posting times</h2><p class="hint">Pick the times you post. Anything before the day starts can count toward the previous posting day.</p>
+          <label>Posting times<textarea name="times" rows="4" required></textarea><small>One time per line in 24-hour format. Saved times apply to new queue entries.</small></label>
+          <label>Posting day starts at<input name="day_start" placeholder="04:00"><small>After-midnight slots go with the day before.</small></label>
+          <label>Posts per posting day<input name="posts_per_day" type="number" min="1" max="24" required></label>
+          <button class="primary" type="submit">Save posting times</button>
+        </form>
+        <form id="queue-form" class="surface form">
+          <h2>Add a ready clip</h2><p class="hint">Each clip takes the next available slot, including when sent to more than one destination.</p>
+          <label>Ready clip<select id="ready-select" name="name" required></select></label>
+          <fieldset id="dest-channels"><legend>Destinations</legend></fieldset>
+          <button class="primary" type="submit">Add to local queue</button>
+        </form>
+      </div>
+      <section class="surface">
+        <div class="surface-head"><h2>Local queue</h2><button id="export">Export queue JSON</button></div>
+        <p class="hint">Upload and schedule each clip with whatever scheduler you already use (Buffer, Later, Metricool, Meta Business Suite...). The export includes local file paths, captions, destinations, and UTC timestamps.</p>
+        <div id="queue-list" class="table-wrap"></div>
+      </section>
+    </section>
+    <section id="scoreboard" class="page" hidden>
+      <div class="page-title"><div><h1>Scoreboard</h1><p>See the results recorded for published clips.</p></div><button data-open="scoreboard">Show CSV in Explorer</button></div>
+      <div id="score-metrics" class="metrics"></div>
+      <section class="surface"><div class="surface-head"><h2>Post results</h2></div><div id="scores" class="table-wrap"></div></section>
+    </section>
+  </div>
+</main>
+<dialog id="creator-dialog">
+  <form id="creator-form" class="form">
+    <h2 id="creator-heading">Add creator</h2>
+    <div class="form-grid">
+      <label>Platform<select name="platform"><option value="youtube">YouTube</option><option value="reddit">Reddit</option><option value="instagram">Instagram</option><option value="tiktok">TikTok</option></select></label>
+      <label>Permission<select name="permission"><option value="unknown">Unknown</option><option value="yes">Yes</option><option value="no">No</option><option value="asked">Asked</option><option value="own">My channel</option><option value="official">Official</option></select></label>
+      <label>Handle or name<input name="handle" required></label>
+      <label>Channel ID<input name="channel_id"></label>
+      <label class="full">Contact<input name="contact"></label>
+      <label class="full">Notes<textarea name="notes" rows="3"></textarea></label>
+    </div>
+    <p id="creator-error" class="error-text" role="alert"></p>
+    <div class="actions"><button type="submit" class="primary">Save creator</button><button type="button" id="cancel-creator">Cancel</button></div>
+  </form>
+</dialog>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

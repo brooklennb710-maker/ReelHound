@@ -1,0 +1,79 @@
+# --- Secrets and credentials (never commit). Commit the *.example.json versions instead. ---
+brand.json
+hunter/config.json
+inbox/config.json
+.env
+.env.*
+*.key
+*.pem
+*token*
+*credentials*
+*.secret
+# YouTube / Instagram sign-in cookies
+*cookie*
+*cookies*.txt
+hunter/youtube_cookies.txt
+
+# --- Media (videos, frames, downloads). Folder skeleton is kept with .gitkeep files. ---
+media/**
+!media/**/
+!media/**/.gitkeep
+control-panel/deleted/
+publish_pack/
+publish_pack-*/
+*.zip
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.m4a
+*.mp3
+*.wav
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.srt
+
+# --- Personal / working data (sample versions are committed instead) ---
+scoreboard.csv
+hunter/creators.csv
+hunter/creators.csv.*
+hunter/finds.csv
+hunter/finds.html
+hunter/seen.json
+control-panel/schedule.json
+inbox/items.json
+clipmaker/autoclip_done*.json
+clipmaker/batch_done.json
+clipmaker/whole_jobs/*.json
+clipmaker/reclip_jobs/
+reviewer/cache.json
+reviewer/results.csv
+reviewer/top.html
+reviewer/sheets/
+batch*/
+
+# --- Logs, backups, caches ---
+*.log
+*.bak
+*.bak-*
+*.backup.*
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Local AI models and Whisper caches ---
+models/
+*.gguf
+*.bin
+*.safetensors
+.cache/
+
+# --- OS / editor ---
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
